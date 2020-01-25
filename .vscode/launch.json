@@ -1,0 +1,47 @@
+{
+   // Use IntelliSense to find out which attributes exist for C# debugging
+   // Use hover for the description of the existing attributes
+   // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+   "version": "0.2.0",
+   "configurations": [
+        {
+            "name": "Run Core platform",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildCore",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/Platforms/Core/bin/Debug/netcoreapp3.1/BinaryInput.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Platforms/Core",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Run DirectX platform",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildDirectX",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/Platforms/DirectX/bin/Debug/netcoreapp3.1/BinaryInput.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Platforms/DirectX",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Run Pipeline",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildPipeline",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/Platforms/Pipeline/bin/Debug/netcoreapp3.1/Pipeline.dll",
+            "args": ["-i", "Game/Assets", "-r", "Platforms/Pipeline/bin", "-o", "Assets", "-l", "Game/Layer1"],
+            "cwd": "${workspaceFolder}",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
