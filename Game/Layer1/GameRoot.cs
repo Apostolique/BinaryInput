@@ -64,11 +64,11 @@ namespace GameProject {
             var validKeys = new Vector2(100, 200);
 
             if (_binaryInput.CurrentMode == BinaryInput.Mode.Search) {
-                _s.DrawString(_font, $"Valid Keys:\n  Up = Reset or go to remove mode.\n  Down = Select\n  Left = Search left\n  Right = Search right", validKeys, Color.White);
+                _s.DrawString(_font, $"Valid Keys:\n  Up    = Reset or go to remove mode.\n  Down  = Select\n  Left  = Search left\n  Right = Search right", validKeys, Color.White);
             } else if (_binaryInput.CurrentMode == BinaryInput.Mode.Select) {
-                _s.DrawString(_font, $"Valid Keys:\n  Up = Cancel\n\n  Left = Select left character\n  Right = Select right character", validKeys, Color.White);
+                _s.DrawString(_font, $"Valid Keys:\n  Up    = Cancel\n\n  Left  = Select left character\n  Right = Select right character", validKeys, Color.White);
             } else {
-                _s.DrawString(_font, $"Valid Keys:\n  Up = Cancel\n  Down = Remove all characters to the right\n  Left = Move cursor left\n  Right = Move cursor right", validKeys, Color.White);
+                _s.DrawString(_font, $"Valid Keys:\n  Up    = Cancel\n  Down  = Remove all characters to the right\n  Left  = Move cursor left\n  Right = Move cursor right", validKeys, Color.White);
             }
 
             _s.End();
