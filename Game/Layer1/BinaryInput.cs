@@ -112,26 +112,30 @@ namespace GameProject {
             }
             cursorPosition -= new Vector2(_cursorSize.Width / 2, 0);
 
-            Color focusColor;
+            Color leftFocusColor;
+            Color rightFocusColor;
             if (CurrentMode == Mode.Search) {
-                focusColor = Color.White;
+                leftFocusColor = new Color(149, 149, 255);
+                rightFocusColor = new Color(255, 149, 149);
             } else if (CurrentMode == Mode.Select) {
-                focusColor = Color.Orange;
+                leftFocusColor = new Color(108, 108, 255);
+                rightFocusColor = new Color(255, 108, 108);
             } else {
-                focusColor = Color.Gray;
+                leftFocusColor = Color.Gray;
+                rightFocusColor = Color.Gray;
             }
 
             SetScissor();
             _s.DrawRectangle(new Rectangle(Position, new Point(Width, Height)), Color.Green);
 
             DrawString($"{_left}", left, Color.Gray);
-            DrawString($"{_leftFocus}", leftFocus, focusColor);
-            DrawString($"{_rightFocus}", rightFocus, focusColor);
+            DrawString($"{_leftFocus}", leftFocus, leftFocusColor);
+            DrawString($"{_rightFocus}", rightFocus, rightFocusColor);
             DrawString($"{_right}", right, Color.Gray);
 
-            DrawString($"{_selection}", selectionPosition, Color.RoyalBlue);
+            DrawString($"{_selection}", selectionPosition, Color.White);
 
-            DrawString($"|", cursorPosition, Color.Red);
+            DrawString($"|", cursorPosition, Color.White);
             ResetScissor();
         }
 
