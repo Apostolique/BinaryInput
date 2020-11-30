@@ -1,1 +1,0 @@
-dotnet publish Platforms/Core -r win-x64 -c Release

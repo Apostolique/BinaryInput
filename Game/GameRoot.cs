@@ -9,8 +9,6 @@ namespace GameProject {
     public class GameRoot : Game {
         public GameRoot() {
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.PreferredBackBufferWidth = 1280;
-            _graphics.PreferredBackBufferHeight = 720;
 
             IsMouseVisible = true;
             Content.RootDirectory = "Content";
@@ -18,6 +16,9 @@ namespace GameProject {
 
         protected override void Initialize() {
             // TODO: Add your initialization logic here
+            _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferredBackBufferHeight = 720;
+            _graphics.ApplyChanges();
 
             base.Initialize();
         }

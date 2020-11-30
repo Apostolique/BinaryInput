@@ -1,0 +1,69 @@
+name: Release to itch.io
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+env:
+  ITCH_GAME_NAME: BinaryInput
+  ITCH_USER_NAME: apos
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      MGFXC_WINE_PATH: /home/runner/.winemonogame
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Setup Wine
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo apt update
+        wget -qO- https://dl.winehq.org/wine-builds/winehq.key | sudo apt-key add -
+        sudo apt install software-properties-common
+        sudo apt-add-repository 'deb http://dl.winehq.org/wine-builds/ubuntu/ bionic main'
+        wget -qO- https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/Release.key | sudo apt-key add -
+        sudo sh -c 'echo "deb https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/ ./" > /etc/apt/sources.list.d/obs.list'
+        sudo apt update
+        sudo apt-get install --install-recommends winehq-stable
+        wget -qO- https://raw.githubusercontent.com/MonoGame/MonoGame/develop/Tools/MonoGame.Effect.Compiler/mgfxc_wine_setup.sh | sh
+    - name: Build Windows
+      run: dotnet publish LudumDare47/GameClient -r win-x64 -c Release --output build-windows
+    - name: Build Osx
+      run: dotnet publish LudumDare47/GameClient -r osx-x64 -c Release --output build-osx
+    - name: Build Linux
+      run: dotnet publish LudumDare47/GameClient -r linux-x64 -c Release --output build-linux
+    - name: Clean NetCoreBeauty
+      run: find . -name 'NetCoreBeauty' -type f -delete
+    - name: Publish Windows build to itch.io
+      uses: josephbmanley/butler-publish-itchio-action@master
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+        CHANNEL: windows
+        ITCH_GAME: ${{ env.ITCH_GAME_NAME }}
+        ITCH_USER: ${{ env.ITCH_USER_NAME }}
+        PACKAGE: build-windows
+    - name: Publish OSX build to itch.io
+      uses: josephbmanley/butler-publish-itchio-action@master
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+        CHANNEL: osx
+        ITCH_GAME: ${{ env.ITCH_GAME_NAME }}
+        ITCH_USER: ${{ env.ITCH_USER_NAME }}
+        PACKAGE: build-osx
+    - name: Publish Linux build to itch.io
+      uses: josephbmanley/butler-publish-itchio-action@master
+      env:
+        BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+        CHANNEL: linux
+        ITCH_GAME: ${{ env.ITCH_GAME_NAME }}
+        ITCH_USER: ${{ env.ITCH_USER_NAME }}
+        PACKAGE: build-linux
