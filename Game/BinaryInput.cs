@@ -29,7 +29,7 @@ namespace GameProject {
             Width = PrefWidth;
             Height = PrefHeight;
         }
-        public override bool UpdateInput() {
+        public override void UpdateInput() {
             if (_resetCondition.Released()) {
                 if (CurrentMode == Mode.Select || CurrentMode == Mode.Remove || (CurrentMode == Mode.Search && (_left.Length != 0 || _right.Length != 0))) {
                     CurrentMode = Mode.Search;
@@ -93,8 +93,6 @@ namespace GameProject {
                     _removeCursor = Math.Max(0, --_removeCursor);
                 }
             }
-
-            return false;
         }
         public override void Draw() {
             var left = Position.ToVector2() + new Vector2(_padding);
@@ -169,30 +167,30 @@ namespace GameProject {
 
         string choices = "abcdefghijklm_nopqrstuvwxyz";
 
-        private ConditionComposite _resetCondition =
-            new ConditionComposite(
-                new ConditionSet(new ConditionKeyboard(Keys.Up)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.Up, 0)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.B, 0))
+        private ICondition _resetCondition =
+            new AnyCondition(
+                new KeyboardCondition(Keys.Up),
+                new GamePadCondition(GamePadButton.Up, 0),
+                new GamePadCondition(GamePadButton.B, 0)
             );
-        private ConditionComposite _selectCondition =
-            new ConditionComposite(
-                new ConditionSet(new ConditionKeyboard(Keys.Down)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.Down, 0)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.A, 0)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.X, 0))
+        private ICondition _selectCondition =
+            new AnyCondition(
+                new KeyboardCondition(Keys.Down),
+                new GamePadCondition(GamePadButton.Down, 0),
+                new GamePadCondition(GamePadButton.A, 0),
+                new GamePadCondition(GamePadButton.X, 0)
             );
-        private ConditionComposite _leftCondition =
-            new ConditionComposite(
-                new ConditionSet(new ConditionKeyboard(Keys.Left)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.Left, 0)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.LeftShoulder, 0))
+        private ICondition _leftCondition =
+            new AnyCondition(
+                new KeyboardCondition(Keys.Left),
+                new GamePadCondition(GamePadButton.Left, 0),
+                new GamePadCondition(GamePadButton.LeftShoulder, 0)
             );
-        private ConditionComposite _rightCondition =
-            new ConditionComposite(
-                new ConditionSet(new ConditionKeyboard(Keys.Right)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.Right, 0)),
-                new ConditionSet(new ConditionGamePad(GamePadButton.RightShoulder, 0))
+        private ICondition _rightCondition =
+            new AnyCondition(
+                new KeyboardCondition(Keys.Right),
+                new GamePadCondition(GamePadButton.Right, 0),
+                new GamePadCondition(GamePadButton.RightShoulder, 0)
             );
     }
 }
