@@ -31,8 +31,7 @@ namespace GameProject {
 
             GuiHelper.Setup(this, _fontSystem);
 
-            _binaryInput = new BinaryInput();
-            _binaryInput.Position = new Point(100, 50);
+            _ui = new IMGUI();
         }
 
         protected override void Update(GameTime gameTime) {
@@ -40,10 +39,11 @@ namespace GameProject {
                 Exit();
 
             GuiHelper.UpdateSetup();
+            _ui.UpdateAll(gameTime);
 
-            _binaryInput.UpdateSetup();
-            _binaryInput.UpdateInput();
-            _binaryInput.Update();
+            var bi = BinaryInput.Put(ref _text);
+            bi.XY = new Vector2(100, 50);
+            _currentMode = bi.CurrentMode;
 
             GuiHelper.UpdateCleanup();
 
@@ -54,19 +54,19 @@ namespace GameProject {
             GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
-            GuiHelper.DrawGui(_binaryInput);
+            _ui.Draw(gameTime);
 
             var font = _fontSystem.GetFont(30);
 
             _s.Begin();
-            _s.DrawString(font, $"Current Mode: {_binaryInput.CurrentMode.ToString()}", new Vector2(100, 150), Color.White);
+            _s.DrawString(font, $"Current Mode: {_currentMode.ToString()}", new Vector2(100, 150), Color.White);
             _s.DrawString(font, "Tutorial:\n  Up          = Reset\n  Down        = Select\n  Left        = Left\n  Right       = Right\n  Reset Twice = Remove mode", new Vector2(100, 400), Color.White);
 
             var validKeys = new Vector2(100, 200);
 
-            if (_binaryInput.CurrentMode == BinaryInput.Mode.Search) {
+            if (_currentMode == BinaryInput.Mode.Search) {
                 _s.DrawString(font, $"Valid Keys:\n  Up    = Reset or go to remove mode.\n  Down  = Select\n  Left  = Search left\n  Right = Search right", validKeys, Color.White);
-            } else if (_binaryInput.CurrentMode == BinaryInput.Mode.Select) {
+            } else if (_currentMode == BinaryInput.Mode.Select) {
                 _s.DrawString(font, $"Valid Keys:\n  Up    = Cancel\n\n  Left  = Select left character\n  Right = Select right character", validKeys, Color.White);
             } else {
                 _s.DrawString(font, $"Valid Keys:\n  Up    = Cancel\n  Down  = Remove all characters to the right\n  Left  = Move cursor left\n  Right = Move cursor right", validKeys, Color.White);
@@ -77,9 +77,12 @@ namespace GameProject {
             base.Draw(gameTime);
         }
 
+        string _text = "";
+
         GraphicsDeviceManager _graphics;
         SpriteBatch _s;
-        BinaryInput _binaryInput;
+        IMGUI _ui;
+        BinaryInput.Mode _currentMode;
         FontSystem _fontSystem;
     }
 }

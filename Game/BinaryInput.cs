@@ -1,18 +1,31 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Apos.Gui;
 using Apos.Input;
+using Track = Apos.Input.Track;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 
 namespace GameProject {
     public class BinaryInput : Component {
-        public BinaryInput() {
+        public BinaryInput(int id, string text) : base(id) {
             reset();
 
+            _selection = text;
             Width = PrefWidth;
             Height = PrefHeight;
+        }
+
+        public string Text {
+            get => _selection;
+            set {
+                if (value != _selection) {
+                    _selection = value;
+                }
+            }
         }
 
         public enum Mode {
@@ -22,14 +35,17 @@ namespace GameProject {
         }
 
         public Mode CurrentMode = Mode.Search;
-        public override int PrefWidth => (int)Math.Max(_textSize.Width, _selectionSize.Width) + _padding * 2;
-        public override int PrefHeight => (int)(_textSize.Height + _selectionSize.Height) + _padding * 2;
+        public override bool IsFocusable { get; set; } = true;
 
-        public override void UpdateSetup() {
+        public override void UpdatePrefSize(GameTime gameTime) {
+            PrefWidth = (int)Math.Max(_textSize.Width, _selectionSize.Width) + _padding * 2;
+            PrefHeight = (int)(_textSize.Height + _selectionSize.Height) + _padding * 2;
+        }
+        public override void UpdateSetup(GameTime gameTime) {
             Width = PrefWidth;
             Height = PrefHeight;
         }
-        public override void UpdateInput() {
+        public override void UpdateInput(GameTime gameTime) {
             if (_resetCondition.Released()) {
                 if (CurrentMode == Mode.Select || CurrentMode == Mode.Remove || (CurrentMode == Mode.Search && (_left.Length != 0 || _right.Length != 0))) {
                     CurrentMode = Mode.Search;
@@ -94,8 +110,8 @@ namespace GameProject {
                 }
             }
         }
-        public override void Draw() {
-            var left = Position.ToVector2() + new Vector2(_padding);
+        public override void Draw(GameTime gameTime) {
+            var left = XY + new Vector2(_padding);
             var leftFocus = left + new Vector2(_leftSize.Width, 0);
             var rightFocus = leftFocus + new Vector2(_leftFocusSize.Width, 0);
             var right = rightFocus + new Vector2(_rightFocusSize.Width, 0);
@@ -123,18 +139,49 @@ namespace GameProject {
                 rightFocusColor = Color.Gray;
             }
 
-            SetScissor();
-            _s.DrawRectangle(new Rectangle(Position, new Point(Width, Height)), Color.Green);
+            GuiHelper.SetScissor(Clip);
+            GuiHelper.SpriteBatch.DrawRectangle(new RectangleF(XY, Size), Color.Green);
 
-            DrawString($"{_left}", left, Color.Gray);
-            DrawString($"{_leftFocus}", leftFocus, leftFocusColor);
-            DrawString($"{_rightFocus}", rightFocus, rightFocusColor);
-            DrawString($"{_right}", right, Color.Gray);
+            var font = GuiHelper.GetFont(30);
 
-            DrawString($"{_selection}", selectionPosition, Color.White);
+            GuiHelper.SpriteBatch.DrawString(font, $"{_left}", left, Color.Gray, GuiHelper.FontScale);
+            GuiHelper.SpriteBatch.DrawString(font, $"{_leftFocus}", leftFocus, leftFocusColor, GuiHelper.FontScale);
+            GuiHelper.SpriteBatch.DrawString(font, $"{_rightFocus}", rightFocus, rightFocusColor, GuiHelper.FontScale);
+            GuiHelper.SpriteBatch.DrawString(font, $"{_right}", right, Color.Gray, GuiHelper.FontScale);
 
-            DrawString($"|", cursorPosition, Color.White);
-            ResetScissor();
+            GuiHelper.SpriteBatch.DrawString(font, $"{_selection}", selectionPosition, Color.White, GuiHelper.FontScale);
+
+            GuiHelper.SpriteBatch.DrawString(font, $"|", cursorPosition, Color.White, GuiHelper.FontScale);
+            GuiHelper.ResetScissor();
+        }
+
+        public static BinaryInput Put(ref string text, [CallerLineNumber] int id = 0, bool isAbsoluteId = false) {
+            // 1. Check if BinaryInput with id already exists.
+            //      a. If already exists. Get it.
+            //      b  If not, create it.
+            // 4. Ping it.
+            id = GuiHelper.CurrentIMGUI.CreateId(id, isAbsoluteId);
+            GuiHelper.CurrentIMGUI.TryGetValue(id, out IComponent c);
+
+            BinaryInput a;
+            if (c is BinaryInput) {
+                a = (BinaryInput)c;
+                // TODO: This should only be set after the text changes.
+                text = a.Text;
+            } else {
+                a = new BinaryInput(id, text);
+            }
+
+            IParent parent = GuiHelper.CurrentIMGUI.GrabParent(a);
+
+            if (a.LastPing != InputHelper.CurrentFrame) {
+                a.LastPing = InputHelper.CurrentFrame;
+                if (parent != null) {
+                    a.Index = parent.NextIndex();
+                }
+            }
+
+            return a;
         }
 
         private void reset() {
@@ -153,14 +200,14 @@ namespace GameProject {
         string _rightFocus;
         string _right = "";
         string _selection = "";
-        protected Size2 _leftSize => MeasureString($"{_left}");
-        protected Size2 _leftFocusSize => MeasureString($"{_leftFocus}");
-        protected Size2 _cursorSize => MeasureString($"|");
-        protected Size2 _rightFocusSize => MeasureString($"{_rightFocus}");
-        protected Size2 _rightSize => MeasureString($"{_right}");
-        protected Size2 _textSize => MeasureString($"{_left}{_leftFocus}{_rightFocus}{_right}");
-        protected Size2 _selectionSize => MeasureString($"{_selection}");
-        protected Size2 _subSelectionSize => MeasureString($"{_selection.Substring(0, _selection.Length - _removeCursor)}");
+        protected Size2 _leftSize => GuiHelper.MeasureString($"{_left}", 30);
+        protected Size2 _leftFocusSize => GuiHelper.MeasureString($"{_leftFocus}", 30);
+        protected Size2 _cursorSize => GuiHelper.MeasureString($"|", 30);
+        protected Size2 _rightFocusSize => GuiHelper.MeasureString($"{_rightFocus}", 30);
+        protected Size2 _rightSize => GuiHelper.MeasureString($"{_right}", 30);
+        protected Size2 _textSize => GuiHelper.MeasureString($"{_left}{_leftFocus}{_rightFocus}{_right}", 30);
+        protected Size2 _selectionSize => GuiHelper.MeasureString($"{_selection}", 30);
+        protected Size2 _subSelectionSize => GuiHelper.MeasureString($"{_selection.Substring(0, _selection.Length - _removeCursor)}", 30);
 
         int _removeCursor = 0;
         int _padding = 10;
@@ -169,28 +216,28 @@ namespace GameProject {
 
         private ICondition _resetCondition =
             new AnyCondition(
-                new KeyboardCondition(Keys.Up),
-                new GamePadCondition(GamePadButton.Up, 0),
-                new GamePadCondition(GamePadButton.B, 0)
+                new Track.KeyboardCondition(Keys.Up),
+                new Track.GamePadCondition(GamePadButton.Up, 0),
+                new Track.GamePadCondition(GamePadButton.B, 0)
             );
         private ICondition _selectCondition =
             new AnyCondition(
-                new KeyboardCondition(Keys.Down),
-                new GamePadCondition(GamePadButton.Down, 0),
-                new GamePadCondition(GamePadButton.A, 0),
-                new GamePadCondition(GamePadButton.X, 0)
+                new Track.KeyboardCondition(Keys.Down),
+                new Track.GamePadCondition(GamePadButton.Down, 0),
+                new Track.GamePadCondition(GamePadButton.A, 0),
+                new Track.GamePadCondition(GamePadButton.X, 0)
             );
         private ICondition _leftCondition =
             new AnyCondition(
-                new KeyboardCondition(Keys.Left),
-                new GamePadCondition(GamePadButton.Left, 0),
-                new GamePadCondition(GamePadButton.LeftShoulder, 0)
+                new Track.KeyboardCondition(Keys.Left),
+                new Track.GamePadCondition(GamePadButton.Left, 0),
+                new Track.GamePadCondition(GamePadButton.LeftShoulder, 0)
             );
         private ICondition _rightCondition =
             new AnyCondition(
-                new KeyboardCondition(Keys.Right),
-                new GamePadCondition(GamePadButton.Right, 0),
-                new GamePadCondition(GamePadButton.RightShoulder, 0)
+                new Track.KeyboardCondition(Keys.Right),
+                new Track.GamePadCondition(GamePadButton.Right, 0),
+                new Track.GamePadCondition(GamePadButton.RightShoulder, 0)
             );
     }
 }
