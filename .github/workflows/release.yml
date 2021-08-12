@@ -42,8 +42,6 @@ jobs:
       run: dotnet publish ${{ env.BUILD_PATH }} -r osx-x64 -c Release --output build-osx
     - name: Build Linux
       run: dotnet publish ${{ env.BUILD_PATH }} -r linux-x64 -c Release --output build-linux
-    - name: Clean NetCoreBeauty
-      run: find . -name 'NetCoreBeauty' -type f -delete
     - name: Publish Windows build to itch.io
       uses: josephbmanley/butler-publish-itchio-action@master
       env:
