@@ -1,14 +1,15 @@
-﻿using System.IO;
-using Apos.Gui;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using FontStashSharp;
+using Apos.Gui;
+using Apos.Input;
 
 namespace GameProject {
     public class GameRoot : Game {
         public GameRoot() {
             _graphics = new GraphicsDeviceManager(this);
+            _graphics.GraphicsProfile = GraphicsProfile.HiDef;
 
             IsMouseVisible = true;
             Content.RootDirectory = "Content";
@@ -35,10 +36,10 @@ namespace GameProject {
         }
 
         protected override void Update(GameTime gameTime) {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (_quit.Pressed())
                 Exit();
 
-            GuiHelper.UpdateSetup();
+            GuiHelper.UpdateSetup(gameTime);
             _ui.UpdateAll(gameTime);
 
             var bi = BinaryInput.Put(ref _text);
@@ -84,5 +85,11 @@ namespace GameProject {
         IMGUI _ui;
         BinaryInput.Mode _currentMode;
         FontSystem _fontSystem;
+
+        ICondition _quit =
+            new AnyCondition(
+                new KeyboardCondition(Keys.Escape),
+                new GamePadCondition(GamePadButton.Back, 0)
+            );
     }
 }

@@ -139,7 +139,7 @@ namespace GameProject {
                 rightFocusColor = Color.Gray;
             }
 
-            GuiHelper.SetScissor(Clip);
+            GuiHelper.PushScissor(Clip);
             GuiHelper.SpriteBatch.DrawRectangle(new RectangleF(XY, Size), Color.Green);
 
             var font = GuiHelper.GetFont(30);
@@ -152,7 +152,7 @@ namespace GameProject {
             GuiHelper.SpriteBatch.DrawString(font, $"{_selection}", selectionPosition, Color.White, GuiHelper.FontScale);
 
             GuiHelper.SpriteBatch.DrawString(font, $"|", cursorPosition, Color.White, GuiHelper.FontScale);
-            GuiHelper.ResetScissor();
+            GuiHelper.PopScissor();
         }
 
         public static BinaryInput Put(ref string text, [CallerLineNumber] int id = 0, bool isAbsoluteId = false) {
